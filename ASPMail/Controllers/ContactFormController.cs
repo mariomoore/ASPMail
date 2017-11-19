@@ -7,11 +7,19 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using ASPMail.Models;
+using ASPMail.Service;
 
 namespace ASPMail.Controllers
 {
     public class ContactFormController : Controller
     {
+        private EmailService _emailService;
+
+        public ContactFormController()
+        {
+            _emailService = new EmailService();
+        }
+
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: ContactForm
@@ -52,6 +60,8 @@ namespace ASPMail.Controllers
             {
                 db.ContactForms.Add(contactForm);
                 db.SaveChanges();
+                var message = _emailService.CreateMailMessage(contactForm);
+                _emailService.SendEmail(message);
                 return RedirectToAction("Index");
             }
 
