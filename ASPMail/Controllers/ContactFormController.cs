@@ -8,24 +8,25 @@ using System.Web;
 using System.Web.Mvc;
 using ASPMail.Models;
 using ASPMail.Service;
+using ASPMail.Repository;
 
 namespace ASPMail.Controllers
 {
     public class ContactFormController : Controller
     {
         private EmailService _emailService;
+        private ContactFormRepository _contactFormRepository;
 
         public ContactFormController()
         {
             _emailService = new EmailService();
-        }
-
-        private ApplicationDbContext db = new ApplicationDbContext();
+            _contactFormRepository = new ContactFormRepository();
+        }               
 
         // GET: ContactForm
         public ActionResult Index()
         {
-            return View(db.ContactForms.ToList());
+            return View(_contactFormRepository.GetWhere(x => x.Id > 0));
         }
 
         // GET: ContactForm/Details/5
@@ -35,7 +36,7 @@ namespace ASPMail.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ContactForm contactForm = db.ContactForms.Find(id);
+            ContactForm contactForm = _contactFormRepository.GetWhere(x => x.Id == id.Value).FirstOrDefault();
             if (contactForm == null)
             {
                 return HttpNotFound();
@@ -57,20 +58,15 @@ namespace ASPMail.Controllers
         public ActionResult Create(ContactForm contactForm)
         {
             if (ModelState.IsValid)
-            {
-                db.ContactForms.Add(contactForm);
-                db.SaveChanges();
+            {                
+                _contactFormRepository.Create(contactForm);                
                 var message = _emailService.CreateMailMessage(contactForm);
                 _emailService.SendEmail(message);
                 return RedirectToAction("Index");
             }
 
             return View(contactForm);
-        }
-
-       
-
-        
+        }           
 
         // GET: ContactForm/Delete/5
         public ActionResult Delete(int? id)
@@ -79,7 +75,7 @@ namespace ASPMail.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ContactForm contactForm = db.ContactForms.Find(id);
+            ContactForm contactForm = _contactFormRepository.GetWhere(x => x.Id == id.Value).FirstOrDefault();
             if (contactForm == null)
             {
                 return HttpNotFound();
@@ -92,9 +88,8 @@ namespace ASPMail.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            ContactForm contactForm = db.ContactForms.Find(id);
-            db.ContactForms.Remove(contactForm);
-            db.SaveChanges();
+            ContactForm contactForm = _contactFormRepository.GetWhere(x => x.Id == id).FirstOrDefault();
+            _contactFormRepository.Delete(contactForm);
             return RedirectToAction("Index");
         }
 

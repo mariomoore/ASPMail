@@ -136,6 +136,8 @@
     <Compile Include="Models\ApplicationDbContext.cs" />
     <Compile Include="Models\ContactForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\AbstractRepository.cs" />
+    <Compile Include="Repository\ContactFormRepository.cs" />
     <Compile Include="Service\EmailService.cs" />
   </ItemGroup>
   <ItemGroup>
